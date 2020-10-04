@@ -43,13 +43,14 @@
                             </div>
                         </div>
 
-                        <span class="s-text8 p-t-5 p-b-5">
+                        <span v-show="products.length" class="s-text8 p-t-5 p-b-5">
                             Showing
                             {{((pageIndex - 1) * perPage) + 1}}
                             –
                             {{ pageIndex === totalPages ? filteredProducts.length - 1 : (((pageIndex - 1) * perPage) - 1) + perPage }}
                             of {{filteredProducts.length - 1}} results
                         </span>
+                        <div v-show="!products.length" class="s-text8 p-t-5 p-b-5 w-100">No products found.</div>
                     </div>
 
                     <!-- Products Loop Start -->
@@ -134,12 +135,17 @@ export default {
     },
     methods: {
         async getProducts() {
+            let products = []
             const response = await fetch('http://localhost:8080/GetMany')
             if (!response.ok) {
                 const message = `Error: ${response.status}`
                 throw new Error(message)
             }
-            const products = await response.json()
+            try {
+                products = await response.json()
+            } catch (error) {
+                console.warn('Error parsing product data')
+            }
             products.forEach((p) => p.tags.push('all'))
             return products
         },
